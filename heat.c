@@ -292,7 +292,19 @@ int main(int argc, char *argv[]) {
 
 	coarsen(param.u, xdim, ydim, param.uvis, xdim_vis, ydim_vis);
 
-	double *uvis_global = (double*)calloc( sizeof(double),
+	/*if (rank == 0){
+	for(i=0; i<ydim_vis;i++){
+		for(j=0;j<xdim_vis;j++){
+			printf("%f ", param.uvis[i*xdim_vis+j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+	}*/
+
+	// This is annoying, actually only rank 0 would need this.
+	// Hope is: exchanging calloc for malloc makes it such that only rank 0 actually allocates.
+	double *uvis_global = (double*)malloc( sizeof(double)*
 				      (param.visres+2) *
 				      (param.visres+2) );
 
@@ -304,6 +316,7 @@ int main(int argc, char *argv[]) {
 				vis_partner_pos[1] = j / xshift_vis;
 				if (vis_partner_pos[0] > dims[0]-1) vis_partner_pos[0] = dims[0]-1;
 				if (vis_partner_pos[1] > dims[1]-1) vis_partner_pos[1] = dims[1]-1;
+				// printf("(%d,%d)\n", vis_partner_pos[0], vis_partner_pos[1]);
 				MPI_Cart_rank(comm_cart, vis_partner_pos, &vis_partner_rank);
 				if (vis_partner_rank == 0){
 					local_ypos_vis = i - vis_partner_pos[0] * yshift_vis;
