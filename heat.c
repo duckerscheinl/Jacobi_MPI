@@ -242,13 +242,21 @@ int main(int argc, char *argv[]) {
 		}
 
 		free(lower_border_send);
+		lower_border_send = 0;
 		free(lower_border_rec);
+		lower_border_rec = 0;
 		free(upper_border_send);
+		upper_border_send = 0;
 		free(upper_border_rec);
+		upper_border_rec = 0;
 		free(left_border_send);
+		left_border_send = 0;
 		free(left_border_rec);
+		left_border_rec = 0;
 		free(right_border_send);
+		right_border_send = 0;
 		free(right_border_rec);
+		right_border_rec = 0;
 
 		exp_number++;
 	}
