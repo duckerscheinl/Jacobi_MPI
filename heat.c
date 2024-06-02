@@ -107,8 +107,13 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	dims[0] = 2;
-	dims[1] = 2;
+	if (argc >= 5){
+		dims[0] = atoi(argv[3]);
+		dims[1] = atoi(argv[4]);
+	} else {
+		fprintf(stderr, "\nError: This is the MPI version! You need to give the Cartesian Grid dimensions!\n\n");
+		return 1;
+	}
 
 	periods[0] = 0;
 	periods[1] = 0;
@@ -143,7 +148,7 @@ int main(int argc, char *argv[]) {
 		if (coords[1] < dims[1] - 1){
 			xdim = param.act_res / dims[1];
 		} else {
-			xdim = param.act_res - param.act_res / dims[1];
+			xdim = param.act_res - (dims[1]-1)*(param.act_res / dims[1]);
 		}
 		xshift = param.act_res / dims[1];
 		xdim += 2;
@@ -151,7 +156,7 @@ int main(int argc, char *argv[]) {
 		if (coords[0] < dims[0] - 1){
 			ydim = param.act_res /dims[0];
 		} else {
-			ydim = param.act_res - param.act_res / dims[0];
+			ydim = param.act_res - (dims[0]-1)*(param.act_res / dims[0]);
 		}
 		ydim += 2;
 		yshift = param.act_res / dims[0];
