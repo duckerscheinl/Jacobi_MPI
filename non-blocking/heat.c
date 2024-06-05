@@ -21,6 +21,8 @@ int main(int argc, char *argv[]) {
 	MPI_Status status;
 	MPI_Request req;
 
+	MPI_Request reqs[4*2];
+
 	MPI_Comm comm_cart;
 	int dims[2];
 	int periods[2];
@@ -226,21 +228,47 @@ int main(int argc, char *argv[]) {
 				right_border_send[n-1] = param.u[n*xdim+(xdim-2)];
 			}
 
-			MPI_Sendrecv(lower_border_send, xdim-2, MPI_DOUBLE, lower_rank, 1,
+			MPI_Irecv(lower_border_rec, xdim-2, MPI_DOUBLE, lower_rank, 1,
+					comm_cart, &reqs[0]);
+
+			MPI_Isend(lower_border_send, xdim-2, MPI_DOUBLE, lower_rank, 3,
+					comm_cart, &reqs[1]);
+
+			/*MPI_Sendrecv(lower_border_send, xdim-2, MPI_DOUBLE, lower_rank, 1,
 						lower_border_rec, xdim-2, MPI_DOUBLE, lower_rank, 1,
-						comm_cart, MPI_STATUS_IGNORE);
+						comm_cart, MPI_STATUS_IGNORE);*/
 
-			MPI_Sendrecv(upper_border_send, xdim-2, MPI_DOUBLE, upper_rank, 1,
+			MPI_Irecv(upper_border_rec, xdim-2, MPI_DOUBLE, upper_rank, 3,
+					comm_cart, &reqs[2]);
+
+			MPI_Isend(upper_border_send, xdim-2, MPI_DOUBLE, upper_rank, 1,
+					comm_cart, &reqs[3]);
+
+			/*MPI_Sendrecv(upper_border_send, xdim-2, MPI_DOUBLE, upper_rank, 1,
 						upper_border_rec, xdim-2, MPI_DOUBLE, upper_rank, 1,
-						comm_cart, MPI_STATUS_IGNORE);
+						comm_cart, MPI_STATUS_IGNORE);*/
 
-			MPI_Sendrecv(left_border_send, ydim-2, MPI_DOUBLE, left_rank, 1,
+			MPI_Irecv(left_border_rec, ydim-2, MPI_DOUBLE, left_rank, 2,
+					comm_cart, &reqs[4]);
+
+			MPI_Isend(left_border_send, ydim-2, MPI_DOUBLE, left_rank, 0,
+					comm_cart, &reqs[5]);
+
+			/*MPI_Sendrecv(left_border_send, ydim-2, MPI_DOUBLE, left_rank, 1,
 						left_border_rec, ydim-2, MPI_DOUBLE, left_rank, 1,
-						comm_cart, MPI_STATUS_IGNORE);
+						comm_cart, MPI_STATUS_IGNORE);*/
 
-			MPI_Sendrecv(right_border_send, ydim-2, MPI_DOUBLE, right_rank, 1,
+			MPI_Irecv(right_border_rec, ydim-2, MPI_DOUBLE, right_rank, 0,
+					comm_cart, &reqs[6]);
+
+			MPI_Isend(right_border_send, ydim-2, MPI_DOUBLE, right_rank, 2,
+					comm_cart, &reqs[7]);
+
+			/*MPI_Sendrecv(right_border_send, ydim-2, MPI_DOUBLE, right_rank, 1,
 						right_border_rec, ydim-2, MPI_DOUBLE, right_rank, 1,
-						comm_cart, MPI_STATUS_IGNORE);
+						comm_cart, MPI_STATUS_IGNORE);*/
+
+			MPI_Waitall(8, reqs, MPI_STATUSES_IGNORE);
 
 			for(m = 1; m < xdim-1; m++){
 				if (lower_rank != MPI_PROC_NULL) param.u[(ydim-1)*xdim+m] = lower_border_rec[m-1];
@@ -250,7 +278,6 @@ int main(int argc, char *argv[]) {
 				if (left_rank != MPI_PROC_NULL) param.u[n*xdim] = left_border_rec[n-1];
 				if (right_rank != MPI_PROC_NULL) param.u[n*xdim+(xdim-1)] = right_border_rec[n-1];
 			}
-
 
 		}
 
